@@ -11,18 +11,16 @@ public class UserDTO implements Serializable{
 	private String name;
 	private String email;
 	private String phone;
-	private String password;
 	
 	public UserDTO() {
 	}
 
-	public UserDTO(Long id, String name, String email, String phone, String password) {
+	public UserDTO(Long id, String name, String email, String phone) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.email = email;
 		this.phone = phone;
-		this.password = password;
 	}
 	
 	public UserDTO(User entity) {
@@ -30,7 +28,6 @@ public class UserDTO implements Serializable{
 		this.name = entity.getName();
 		this.email = entity.getEmail();
 		this.phone = entity.getPhone();
-		this.password = entity.getPassword();
 	}
 
 	public Long getId() {
@@ -66,16 +63,8 @@ public class UserDTO implements Serializable{
 	}
 	
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	public User toEntity() {
-		return new User(id, name, email, phone, password);
+		return new User(id, name, email, phone, null);
 	}
 	
 }
