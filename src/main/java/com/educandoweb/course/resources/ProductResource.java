@@ -1,6 +1,7 @@
 package com.educandoweb.course.resources;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.educandoweb.course.dto.CategoryDTO;
 import com.educandoweb.course.dto.ProductCategoriesDTO;
 import com.educandoweb.course.dto.ProductDTO;
 import com.educandoweb.course.services.ProductService;
@@ -34,14 +36,31 @@ public class ProductResource {
 
 	@GetMapping
 	public ResponseEntity<Page<ProductDTO>> findAllPaged(
+			@RequestParam(value = "name", defaultValue = "") String name,
+			@RequestParam(value = "categories", defaultValue = "") String categories,
 			@RequestParam(value = "page", defaultValue = "0") Integer page,
 			@RequestParam(value = "linesPerPage", defaultValue = "12") Integer linesPerPage,
 			@RequestParam(value = "orderBy", defaultValue = "name") String orderBy,
 			@RequestParam(value = "direction", defaultValue = "ASC") String direction) {
+		
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
-		Page<ProductDTO> list = service.findAllPaged(pageRequest);
+		Page<ProductDTO> list = service.findByNameCategoryPaged(name, categories, pageRequest);
 		return ResponseEntity.ok().body(list);
 	}
+	
+	@GetMapping(value = "/category/{categoryId}")
+	public ResponseEntity<Page<ProductDTO>> findByCategoryPaged(
+			@PathVariable Long categoryId,
+			@RequestParam(value = "page", defaultValue = "0") Integer page,
+			@RequestParam(value = "linesPerPage", defaultValue = "12") Integer linesPerPage,
+			@RequestParam(value = "orderBy", defaultValue = "name") String orderBy,
+			@RequestParam(value = "direction", defaultValue = "ASC") String direction) {
+		
+		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
+		Page<ProductDTO> list = service.findByCategoryPaged(categoryId, pageRequest);
+		return ResponseEntity.ok().body(list);
+	}
+
 
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
@@ -68,6 +87,27 @@ public class ProductResource {
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		service.delete(id);
+		return ResponseEntity.noContent().build();
+	}
+	
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PutMapping(value = "/{id}/addcategory")
+	public ResponseEntity<Void> addCategory(@PathVariable Long id,@RequestBody CategoryDTO dto) {
+		service.addCategory(id, dto);
+		return ResponseEntity.noContent().build();
+	}
+	
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PutMapping(value = "/{id}/removecategory")
+	public ResponseEntity<Void> removeCategory(@PathVariable Long id,@RequestBody CategoryDTO dto) {
+		service.removeCategory(id, dto);
+		return ResponseEntity.noContent().build();
+	}
+	
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	@PutMapping(value = "/{id}/setcategories")
+	public ResponseEntity<Void> setCategories(@PathVariable Long id,@RequestBody List<CategoryDTO> dto) {
+		service.setCategories(id, dto);
 		return ResponseEntity.noContent().build();
 	}
 }
